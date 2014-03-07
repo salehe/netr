@@ -5,7 +5,7 @@ import java.util.TreeSet
 
 class Edge(val v1: Int, val v2: Int, val w: Double)
 
-class APSPInfo(val spd: Array<Array<Double>>, val path: Array<Array<Int>>)
+class APSPInfo(val dist: Array<Array<Double>>, val path: Array<Array<Int>>)
 
 class Graph(val nv: Int)
 {
@@ -32,19 +32,19 @@ class Graph(val nv: Int)
 
     fun apsp(): APSPInfo
     {
-        val spd : Array<Array<Double>> = Array(nv, {i -> Array<Double>(nv, {j -> java.lang.Double.MAX_VALUE})})
+        val dist : Array<Array<Double>> = Array(nv, {i -> Array<Double>(nv, {j -> java.lang.Double.MAX_VALUE})})
         val path : Array<Array<Int>> = Array(nv, {i -> Array<Int>(nv, {j -> i})})
 
         for (i in 0..nv-1)
         {
-            spd[i][i] = 0.0
+            dist[i][i] = 0.0
             path[i][i] = i
         }
 
         for (e in edges)
         {
-            spd[e.v1][e.v2] = e.w
-            spd[e.v2][e.v1] = e.w
+            dist[e.v1][e.v2] = e.w
+            dist[e.v2][e.v1] = e.w
             path[e.v1][e.v2] = e.v1
             path[e.v2][e.v1] = e.v2
         }
@@ -53,17 +53,17 @@ class Graph(val nv: Int)
             for (i in 0..nv-1)
                 for (j in 0..nv-1)
                 {
-                    if (spd[i][j] > spd[i][k] + spd[k][j])
+                    if (dist[i][j] > dist[i][k] + dist[k][j])
                     {
-                        spd[i][j] = spd[i][k] + spd[k][j]
+                        dist[i][j] = dist[i][k] + dist[k][j]
                         path[i][j] = path[k][j]
                     }
                 }
 
-        return APSPInfo(spd, path);
+        return APSPInfo(dist, path);
     }
 
-    private fun minDistanceFromSet(target: Set<Int>, source: List<Int>, spd: Array<Array<Double>>): Pair<Int, Int>?
+    private fun minDistanceFromSet(target: Set<Int>, source: List<Int>, dist: Array<Array<Double>>): Pair<Int, Int>?
     {
         var minDistance = java.lang.Double.MAX_VALUE
         var minSource : Int? = null
@@ -74,9 +74,9 @@ class Graph(val nv: Int)
             {
                 for (t in target)
                 {
-                    if (spd[s][t] < minDistance)
+                    if (dist[s][t] < minDistance)
                     {
-                        minDistance = spd[s][t]
+                        minDistance = dist[s][t]
                         minSource = s
                         minTarget = t
                     }
@@ -92,7 +92,7 @@ class Graph(val nv: Int)
     fun kmb(terminals: List<Int>): Set<Edge>
     {
         val apsp = apsp()
-        val spd = apsp.spd
+        val dist = apsp.dist
         val path = apsp.path
         val am = adjMatrix()
 
@@ -105,7 +105,7 @@ class Graph(val nv: Int)
 
         while (true)
         {
-            val next = minDistanceFromSet(tVertices, terminals, spd)
+            val next = minDistanceFromSet(tVertices, terminals, dist)
             if (next == null)
                 break;
             val minSource = next.first
